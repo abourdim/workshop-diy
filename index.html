@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workshop-DIY — Robotics & STEM Education</title>
+<meta name="description" content="Workshop-DIY: Hands-on robotics, electronics and coding workshops for kids in Chelles, France.">
+<meta name="theme-color" content="#020617">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700&family=Share+Tech+Mono&family=IBM+Plex+Mono:wght@400;600&family=DM+Sans:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@400;500;600;700&family=Noto+Kufi+Arabic:wght@400;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@400;600;700;900&family=Playfair+Display:wght@400;600;700;900&family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{overflow-x:hidden;min-height:100vh}
+@keyframes sBounce{0%,100%{transform:translateY(0);opacity:.3}50%{transform:translateY(7px);opacity:1}}
+@keyframes logoGlow{0%,100%{filter:drop-shadow(0 0 6px var(--glow1))}50%{filter:drop-shadow(0 0 14px var(--accent))}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.dsk-nav{display:flex!important}.mob-btn{display:none!important}
+@media(max-width:768px){.dsk-nav{display:none!important}.mob-btn{display:flex!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef}=React;
+
+/* ═══ LOGO (transparent image) ═══ */
+const Logo=({color,size=48,filter:f})=>(
+React.createElement("img",{src:"logo-transparent.png",alt:"Workshop DIY",width:size,height:size,style:{display:"block",filter:f||"none"}})
+);
+
+/* ═══ THEMES (inspired by user's CSS variable system) ═══ */
+const themes={
+  stealth:{name:"Stealth",icon:"🌙",bg:"#020617",bgAlt:"#0f172a",surface:"rgba(15,23,42,0.96)",text:"#f9fafb",textMuted:"#9ca3af",primary:"#22c55e",secondary:"#3b82f6",accent:"#22c55e",accent2:"#3b82f6",gradient:"linear-gradient(135deg,#22c55e,#16a34a)",cardBorder:"rgba(148,163,184,0.3)",radius:"12px",shadow:"0 24px 60px rgba(15,23,42,0.85),0 0 0 1px rgba(148,163,184,0.3)",font:"'Share Tech Mono',monospace",fontBody:"'IBM Plex Mono',monospace",navBg:"rgba(2,6,23,0.92)",heroBg:"radial-gradient(circle at top left,rgba(34,197,94,0.18),transparent 50%),radial-gradient(circle at bottom right,rgba(59,130,246,0.2),transparent 55%)",btnText:"#fff",glow:"rgba(34,197,94,0.18)",chipGlow:"0 0 16px rgba(34,197,94,0.6)",logoFilter:"brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(100deg)"},
+  neon:{name:"Neon",icon:"⚡",bg:"#0a0a1a",bgAlt:"#12122a",surface:"rgba(18,18,42,0.96)",text:"#eeeeff",textMuted:"#8888bb",primary:"#00d4ff",secondary:"#ff00ff",accent:"#00d4ff",accent2:"#ff00ff",gradient:"linear-gradient(135deg,#00d4ff,#0088ff)",cardBorder:"rgba(100,100,255,0.25)",radius:"12px",shadow:"0 24px 60px rgba(10,10,26,0.9),0 0 0 1px rgba(100,100,255,0.25)",font:"'Orbitron',sans-serif",fontBody:"'Exo 2',sans-serif",navBg:"rgba(10,10,26,0.92)",heroBg:"radial-gradient(circle at top left,rgba(0,212,255,0.2),transparent 50%),radial-gradient(circle at bottom right,rgba(255,0,255,0.15),transparent 55%)",btnText:"#fff",glow:"rgba(0,212,255,0.2)",chipGlow:"0 0 16px rgba(0,212,255,0.6)",logoFilter:"brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(155deg)"},
+  arctic:{name:"Arctic",icon:"☁️",bg:"#e8eef4",bgAlt:"#f0f4f8",surface:"rgba(255,255,255,0.95)",text:"#1e293b",textMuted:"#64748b",primary:"#2563eb",secondary:"#06b6d4",accent:"#2563eb",accent2:"#06b6d4",gradient:"linear-gradient(135deg,#2563eb,#3b82f6)",cardBorder:"rgba(100,130,170,0.25)",radius:"12px",shadow:"0 4px 24px rgba(100,116,139,0.15)",font:"'DM Sans',sans-serif",fontBody:"'DM Sans',sans-serif",navBg:"rgba(232,238,244,0.92)",heroBg:"radial-gradient(circle at top left,rgba(37,99,235,0.1),transparent 50%),radial-gradient(circle at bottom right,rgba(6,182,212,0.08),transparent 55%)",btnText:"#fff",glow:"rgba(37,99,235,0.08)",chipGlow:"0 0 12px rgba(37,99,235,0.3)",logoFilter:"brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(185deg)"},
+  blaze:{name:"Blaze",icon:"🔥",bg:"#fdf2e9",bgAlt:"#fef7f0",surface:"rgba(255,255,255,0.95)",text:"#292524",textMuted:"#78716c",primary:"#ea580c",secondary:"#dc2626",accent:"#ea580c",accent2:"#dc2626",gradient:"linear-gradient(135deg,#ea580c,#f97316)",cardBorder:"rgba(194,120,60,0.2)",radius:"12px",shadow:"0 4px 24px rgba(120,113,108,0.12)",font:"'Fredoka',sans-serif",fontBody:"'Nunito',sans-serif",navBg:"rgba(253,242,233,0.92)",heroBg:"radial-gradient(circle at top left,rgba(234,88,12,0.1),transparent 50%),radial-gradient(circle at bottom right,rgba(250,204,21,0.08),transparent 55%)",btnText:"#fff",glow:"rgba(234,88,12,0.06)",chipGlow:"0 0 12px rgba(234,88,12,0.4)",logoFilter:"brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(340deg)"},
+  andalous:{name:"Andalous",icon:"🕌",bg:"#0c1a0e",bgAlt:"#132216",surface:"rgba(16,30,18,0.96)",text:"#f0e6d2",textMuted:"#a89878",primary:"#d4a54a",secondary:"#8b6914",accent:"#d4a54a",accent2:"#8b6914",gradient:"linear-gradient(135deg,#d4a54a,#b8860b)",cardBorder:"rgba(212,165,74,0.25)",radius:"12px",shadow:"0 24px 60px rgba(12,26,14,0.9),0 0 0 1px rgba(212,165,74,0.2)",font:"'El Messiri',sans-serif",fontBody:"'El Messiri',sans-serif",navBg:"rgba(12,26,14,0.94)",heroBg:"radial-gradient(circle at top left,rgba(212,165,74,0.15),transparent 50%),radial-gradient(circle at bottom right,rgba(139,105,20,0.12),transparent 55%)",btnText:"#0c1a0e",glow:"rgba(212,165,74,0.12)",chipGlow:"0 0 16px rgba(212,165,74,0.5)",islamic:true,logoFilter:"brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(358deg) brightness(0.85)"},
+  alhambra:{name:"Alhambra",icon:"🏰",bg:"#1a0e0a",bgAlt:"#261812",surface:"rgba(30,16,12,0.96)",text:"#f5e6d0",textMuted:"#b89070",primary:"#e8a44a",secondary:"#c0392b",accent:"#e8a44a",accent2:"#c0392b",gradient:"linear-gradient(135deg,#e8a44a,#d4783a)",cardBorder:"rgba(232,164,74,0.22)",radius:"12px",shadow:"0 24px 60px rgba(26,14,10,0.9),0 0 0 1px rgba(232,164,74,0.2)",font:"'El Messiri',sans-serif",fontBody:"'El Messiri',sans-serif",navBg:"rgba(26,14,10,0.94)",heroBg:"radial-gradient(circle at top left,rgba(232,164,74,0.15),transparent 50%),radial-gradient(circle at bottom right,rgba(192,57,43,0.1),transparent 55%)",btnText:"#1a0e0a",glow:"rgba(232,164,74,0.12)",chipGlow:"0 0 16px rgba(232,164,74,0.5)",islamic:true,logoFilter:"brightness(0) invert(1) sepia(1) saturate(3) hue-rotate(358deg) brightness(0.9)"}
+};
+
+/* ═══ TRANSLATIONS ═══ */
+const T={
+  en:{dir:"ltr",lf:null,nav:["🏠 Home","🤖 Workshops","🚀 Apps","🛒 Shop","👨‍🔧 Team","✉️ Contact"],hero:{title:"Workshop-DIY",sub:"Robotics & STEM Education",tag:"Where kids become makers, coders & innovators",cta1:"Explore Workshops",cta2:"Shop Kits",cta3:"Explore Apps",badge:"Chelles, France",chip:"Play • Learn • Create"},wh:{title:"Our Workshops",sub:"Hands-on learning for curious minds",all:"All",beg:"Beginner",int:"Intermediate",adv:"Advanced",age:"Age",dur:"Duration"},ws:[{t:"Walking Machine",d:"Build a mechanical walking robot and learn linkage mechanisms.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"BBC micro:bit",d:"Discover the micro:bit board and program interactive gadgets.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Line Follower Robot",d:"Program the Maqueen robot to follow lines using sensors.",age:"6+",dur:"2h",lvl:"Beginner"},{t:"Create Your Blog",d:"Learn web basics and build your own internet blog.",age:"10+",dur:"3h",lvl:"Intermediate"},{t:"Laser Engrave on Wood",d:"Design and engrave photos onto wood with laser tech.",age:"10+",dur:"2h",lvl:"Intermediate"},{t:"Laser Engrave on Mirror",d:"Engrave photos onto mirrors with precision laser.",age:"10+",dur:"2h",lvl:"Intermediate"},{t:"mBot Explorer Camp",d:"Full-day camp: build and program mBot robots.",age:"8+",dur:"1 day",lvl:"Intermediate"},{t:"Build Your Robot A-Z",d:"Design, assemble and program a robot from scratch.",age:"10+",dur:"2 days",lvl:"Advanced"},{t:"Cart Pushing Robot",d:"Create a robot that pushes carts using servo motors.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Walking Rabbit Robot",d:"Assemble a cute walking rabbit robot with servos.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Smart Garden",d:"Automate a garden with sensors and microcontrollers.",age:"10+",dur:"3h",lvl:"Intermediate"},{t:"Flight Simulator",d:"Build a simulator with MPU6050 sensors and physics.",age:"10+",dur:"3h",lvl:"Advanced"},{t:"Magic Radar",d:"Build a radar with ultrasonic sensors and servos.",age:"12+",dur:"3h",lvl:"Advanced"},{t:"AI for Beginners",d:"Fun introduction to artificial intelligence concepts.",age:"10+",dur:"2h",lvl:"Beginner"},{t:"Linux Fun Commands",d:"Explore Linux with cowsay, fortune and fun commands.",age:"10+",dur:"1.5h",lvl:"Beginner"},{t:"Neopixels & micro:bit",d:"Create colorful LED animations with Neopixels.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"3D Luminous Smiley",d:"Design and build a glowing 3D smiley with LEDs.",age:"8+",dur:"2h",lvl:"Intermediate"},{t:"Wheel-Bit Robot v2",d:"Make your own Wheel-Bit robot clone.",age:"10+",dur:"3h",lvl:"Advanced"}],shop:{title:"Shop",sub:"Get your hands on our kits",product:"ESP32 Lite Smart Robot Kit",price:"€33",ship:"Ships worldwide in 48h",order:"Order Now",feat:["ESP32 Wi-Fi & Bluetooth","2× Rotation Servos","2× Neopixel RGB LEDs","OLED Display 128×64","Ultrasonic Sensor","Passive Buzzer","Push Button & LEDs","Arduino Code Included"],perfect:"Perfect for:",audience:["Students & Educators","Maker Spaces","Personal Projects","ESP32 Enthusiasts"],made:"Made in Chelles"},team:{title:"Our Team",sub:"The people behind Workshop-DIY",mission:"Our Mission",mt:"Workshop-DIY is a French association in Chelles dedicated to making robotics, electronics and coding accessible to everyone — especially young minds. Through hands-on workshops, we spark curiosity and build the makers of tomorrow.",name:"Abdelhak",role:"Founder & Lead Instructor",bio:"Embedded software engineer passionate about STEM education. Creator of Workshop-DIY, designer of all workshop kits and curriculum.",gh:"GitHub Projects",gi:["face-quest — Face Detection","face-tracking — Face Tracking","talking-robot — Talking Robot","teachable-machine — AI Training","magic-hands — Hand Tracking","bitPlayground — micro:bit"]},contact:{title:"Get in Touch",sub:"Abdelhak BOURDIM",loc:"Chelles, France",web:"workshop-diy.org",addr:"11, Rue du Sillon — 77500 Chelles, France",phone:"+33 6 19 51 51 73",phoneHref:"tel:+33619515173",emailAddr:"abdelhak.bourdim@gmail.com",gh:"GitHub",copy:"© 2024–2026 Workshop-DIY Association"}},
+  fr:{dir:"ltr",lf:null,nav:["🏠 Accueil","🤖 Ateliers","🚀 Apps","🛒 Boutique","👨‍🔧 Équipe","✉️ Contact"],hero:{title:"Workshop-DIY",sub:"Robotique & Éducation STEM",tag:"Où les enfants deviennent makers, codeurs & innovateurs",cta1:"Découvrir les Ateliers",cta2:"Boutique Kits",cta3:"Explorer Apps",badge:"Chelles, France",chip:"Jouer • Apprendre • Créer"},wh:{title:"Nos Ateliers",sub:"Apprentissage pratique pour esprits curieux",all:"Tous",beg:"Débutant",int:"Intermédiaire",adv:"Avancé",age:"Âge",dur:"Durée"},ws:[{t:"Machine Marchante",d:"Construis un robot marchant et apprends les mécanismes.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"BBC micro:bit",d:"Découvre la carte micro:bit et programme des gadgets.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Robot Suiveur de Ligne",d:"Programme le robot Maqueen pour suivre des lignes.",age:"6+",dur:"2h",lvl:"Beginner"},{t:"Crée ton Blog",d:"Apprends les bases du web et crée ton propre blog.",age:"10+",dur:"3h",lvl:"Intermediate"},{t:"Gravure Laser sur Bois",d:"Grave des photos sur bois avec la technologie laser.",age:"10+",dur:"2h",lvl:"Intermediate"},{t:"Gravure Laser sur Miroir",d:"Grave des photos sur miroir avec précision laser.",age:"10+",dur:"2h",lvl:"Intermediate"},{t:"Stage mBot Explorer",d:"Stage complet : construis et programme des robots mBot.",age:"8+",dur:"1 jour",lvl:"Intermediate"},{t:"Fabrique ton Robot A-Z",d:"Conçois, assemble et programme un robot de zéro.",age:"10+",dur:"2 jours",lvl:"Advanced"},{t:"Robot Pousseur",d:"Crée un robot qui pousse des chariots avec des servos.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Robot Lapin Marchant",d:"Assemble un robot lapin marchant avec des servos.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Jardin Intelligent",d:"Automatise un jardin avec capteurs et microcontrôleurs.",age:"10+",dur:"3h",lvl:"Intermediate"},{t:"Simulateur de Vol",d:"Construis un simulateur avec capteurs MPU6050.",age:"10+",dur:"3h",lvl:"Advanced"},{t:"Radar Magique",d:"Construis un radar avec capteurs ultrasoniques.",age:"12+",dur:"3h",lvl:"Advanced"},{t:"IA pour Débutants",d:"Introduction ludique à l'intelligence artificielle.",age:"10+",dur:"2h",lvl:"Beginner"},{t:"Commandes Linux Fun",d:"Explore Linux avec cowsay, fortune et commandes fun.",age:"10+",dur:"1.5h",lvl:"Beginner"},{t:"Neopixels & micro:bit",d:"Crée des animations LED colorées avec Neopixels.",age:"8+",dur:"2h",lvl:"Beginner"},{t:"Smiley 3D Lumineux",d:"Conçois un smiley 3D lumineux avec LEDs.",age:"8+",dur:"2h",lvl:"Intermediate"},{t:"Robot Wheel-Bit v2",d:"Fabrique ton clone du robot Wheel-Bit.",age:"10+",dur:"3h",lvl:"Advanced"}],shop:{title:"Boutique",sub:"Nos kits à portée de main",product:"Kit Robot ESP32 Lite",price:"€33",ship:"Livraison mondiale en 48h",order:"Commander",feat:["ESP32 Wi-Fi & Bluetooth","2× Servos Rotation","2× Neopixel RGB LEDs","Écran OLED 128×64","Capteur Ultrasonique","Buzzer Passif","Bouton & LEDs","Code Arduino Inclus"],perfect:"Idéal pour :",audience:["Étudiants & Éducateurs","Makerspaces","Projets Personnels","Passionnés ESP32"],made:"Fabriqué à Chelles"},team:{title:"Notre Équipe",sub:"Les personnes derrière Workshop-DIY",mission:"Notre Mission",mt:"Workshop-DIY est une association française à Chelles dédiée à rendre la robotique, l'électronique et le code accessibles à tous — surtout aux jeunes esprits.",name:"Abdelhak",role:"Fondateur & Instructeur",bio:"Ingénieur logiciel embarqué passionné par l'éducation STEM. Créateur de Workshop-DIY.",gh:"Projets GitHub",gi:["face-quest — Détection Visages","face-tracking — Suivi Visages","talking-robot — Robot Parlant","teachable-machine — IA Training","magic-hands — Suivi Mains","bitPlayground — micro:bit"]},contact:{title:"Contactez-nous",sub:"Abdelhak BOURDIM",loc:"Chelles, France",web:"workshop-diy.org",addr:"11, Rue du Sillon — 77500 Chelles, France",phone:"+33 6 19 51 51 73",phoneHref:"tel:+33619515173",emailAddr:"abdelhak.bourdim@gmail.com",gh:"GitHub",copy:"© 2024–2026 Association Workshop-DIY"}},
+  ar:{dir:"rtl",lf:"'El Messiri',sans-serif",nav:["🏠 الرئيسية","🤖 الورشات","🚀 تطبيقات","🛒 المتجر","👨‍🔧 الفريق","✉️ اتصل بنا"],hero:{title:"Workshop-DIY",sub:"الروبوتات وتعليم العلوم",tag:"حيث يصبح الأطفال صنّاعاً ومبرمجين ومبتكرين",cta1:"اكتشف الورشات",cta2:"تسوق الآن",cta3:"استكشف التطبيقات",badge:"شيل، فرنسا",chip:"العب • تعلّم • ابتكر"},wh:{title:"ورشاتنا",sub:"تعلّم عملي للعقول الفضولية",all:"الكل",beg:"مبتدئ",int:"متوسط",adv:"متقدم",age:"العمر",dur:"المدة"},ws:[{t:"آلة المشي",d:"ابنِ روبوت مشي وتعلّم آليات الربط.",age:"+8",dur:"ساعتان",lvl:"Beginner"},{t:"مايكرو:بت",d:"اكتشف لوحة مايكرو:بت وبرمج أدوات تفاعلية.",age:"+8",dur:"ساعتان",lvl:"Beginner"},{t:"روبوت تتبع الخط",d:"برمج روبوت ماكوين لتتبع الخطوط.",age:"+6",dur:"ساعتان",lvl:"Beginner"},{t:"أنشئ مدونتك",d:"تعلّم أساسيات الويب وأنشئ مدونتك.",age:"+10",dur:"3 ساعات",lvl:"Intermediate"},{t:"نقش ليزر على الخشب",d:"صمّم وانقش صوراً على الخشب بالليزر.",age:"+10",dur:"ساعتان",lvl:"Intermediate"},{t:"نقش ليزر على المرآة",d:"انقش صوراً على المرايا بدقة الليزر.",age:"+10",dur:"ساعتان",lvl:"Intermediate"},{t:"معسكر mBot",d:"معسكر يوم كامل لبناء وبرمجة روبوتات.",age:"+8",dur:"يوم",lvl:"Intermediate"},{t:"ابنِ روبوتك من الصفر",d:"صمّم وركّب وبرمج روبوتاً كاملاً.",age:"+10",dur:"يومان",lvl:"Advanced"},{t:"روبوت الدفع",d:"أنشئ روبوتاً يدفع العربات بسيرفو.",age:"+8",dur:"ساعتان",lvl:"Beginner"},{t:"روبوت الأرنب",d:"ركّب روبوت أرنب ماشي بسيرفو.",age:"+8",dur:"ساعتان",lvl:"Beginner"},{t:"الحديقة الذكية",d:"أتمت حديقة بالمستشعرات.",age:"+10",dur:"3 ساعات",lvl:"Intermediate"},{t:"محاكي الطيران",d:"ابنِ محاكياً بمستشعرات MPU6050.",age:"+10",dur:"3 ساعات",lvl:"Advanced"},{t:"الرادار السحري",d:"ابنِ رادارًا بمستشعرات فوق صوتية.",age:"+12",dur:"3 ساعات",lvl:"Advanced"},{t:"ذكاء اصطناعي للمبتدئين",d:"مقدمة ممتعة للذكاء الاصطناعي.",age:"+10",dur:"ساعتان",lvl:"Beginner"},{t:"أوامر لينكس الممتعة",d:"استكشف لينكس مع أوامر ممتعة.",age:"+10",dur:"1.5 ساعة",lvl:"Beginner"},{t:"نيوبكسل و مايكرو:بت",d:"أنشئ رسوماً متحركة ملوّنة بالأضواء.",age:"+8",dur:"ساعتان",lvl:"Beginner"},{t:"سمايلي 3D مضيء",d:"صمّم سمايلي مضيء بتقنية LED.",age:"+8",dur:"ساعتان",lvl:"Intermediate"},{t:"روبوت Wheel-Bit v2",d:"اصنع نسختك من روبوت Wheel-Bit.",age:"+10",dur:"3 ساعات",lvl:"Advanced"}],shop:{title:"المتجر",sub:"احصل على أدواتنا",product:"طقم روبوت ESP32 لايت",price:"€33",ship:"شحن عالمي خلال 48 ساعة",order:"اطلب الآن",feat:["ESP32 واي فاي وبلوتوث","2× محركات سيرفو","2× أضواء نيوبكسل","شاشة OLED 128×64","مستشعر فوق صوتي","بازر سلبي","زر وأضواء LED","كود أردوينو مُرفق"],perfect:"مثالي لـ:",audience:["الطلاب والمعلمين","مساحات الصنّاع","المشاريع الشخصية","هواة ESP32"],made:"صُنع في شيل"},team:{title:"فريقنا",sub:"الأشخاص وراء Workshop-DIY",mission:"مهمتنا",mt:"Workshop-DIY جمعية فرنسية في شيل مكرّسة لجعل الروبوتات والبرمجة في متناول الجميع — خاصة العقول الشابة.",name:"عبد الحق",role:"المؤسس والمدرّب الرئيسي",bio:"مهندس برمجيات مدمجة شغوف بتعليم العلوم. مبتكر Workshop-DIY.",gh:"مشاريع GitHub",gi:["face-quest — كشف الوجوه","face-tracking — تتبع الوجوه","talking-robot — روبوت ناطق","teachable-machine — تدريب ذكاء اصطناعي","magic-hands — تتبع اليدين","bitPlayground — مايكرو:بت"]},contact:{title:"تواصل معنا",sub:"عبد الحق بورديم",loc:"شيل، فرنسا",web:"workshop-diy.org",addr:"11, Rue du Sillon — 77500 Chelles, France",phone:"+33 6 19 51 51 73",phoneHref:"tel:+33619515173",emailAddr:"abdelhak.bourdim@gmail.com",gh:"GitHub",copy:"© 2024–2026 جمعية Workshop-DIY"}}
+};
+
+const lvlC={Beginner:["#22c55e","rgba(34,197,94,0.15)"],Intermediate:["#f59e0b","rgba(245,158,11,0.15)"],Advanced:["#ef4444","rgba(239,68,68,0.15)"]};
+const lvlE={Beginner:"🟢",Intermediate:"🟡",Advanced:"🔴"};
+const sIds=["home","workshops","apps","shop","team","contact"];
+const ghR=["face-quest","face-tracking","talking-robot","teachable-machine","magic-hands","bitPlayground"];
+
+function Particles({theme}){
+  const ref=useRef(null),aRef=useRef(0);
+  useEffect(()=>{
+    const c=ref.current;if(!c)return;const ctx=c.getContext("2d");
+    let w=c.width=c.parentElement.offsetWidth,h=c.height=c.parentElement.offsetHeight;
+    const cols=[theme.primary,theme.secondary,theme.accent2];
+    const pts=Array.from({length:30},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*0.6,vy:(Math.random()-0.5)*0.6,r:Math.random()*2+1,c:cols[~~(Math.random()*3)],a:Math.random()*0.35+0.15}));
+    const draw=()=>{ctx.clearRect(0,0,w,h);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c+Math.round(p.a*255).toString(16).padStart(2,"0");ctx.fill();});pts.forEach((a,i)=>pts.slice(i+1).forEach(b=>{const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<100){ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=theme.primary+Math.round((1-d/100)*25).toString(16).padStart(2,"0");ctx.lineWidth=0.5;ctx.stroke();}}));aRef.current=requestAnimationFrame(draw);};
+    draw();const onR=()=>{w=c.width=c.parentElement.offsetWidth;h=c.height=c.parentElement.offsetHeight;};window.addEventListener("resize",onR);
+    return()=>{cancelAnimationFrame(aRef.current);window.removeEventListener("resize",onR);};
+  },[theme]);
+  return React.createElement("canvas",{ref,style:{position:"absolute",inset:0,pointerEvents:"none",opacity:0.5}});
+}
+
+/* ═══ ISLAMIC DECORATIVE COMPONENTS ═══ */
+
+const StarDivider=({color,glow})=>React.createElement("div",{style:{display:"flex",alignItems:"center",justifyContent:"center",gap:10,padding:"24px 0"}},
+  React.createElement("div",{style:{flex:1,maxWidth:120,height:1,background:`linear-gradient(to right,transparent,${color}55)`}}),
+  React.createElement("div",{style:{width:5,height:5,borderRadius:"50%",background:color,opacity:0.4}}),
+  React.createElement("div",{style:{width:6,height:6,borderRadius:"50%",background:color,opacity:0.5}}),
+  React.createElement("svg",{xmlns:"http://www.w3.org/2000/svg",viewBox:"0 0 100 100",width:30,height:30,style:{filter:`drop-shadow(0 0 8px ${glow})`}},
+    React.createElement("polygon",{points:"50,2 61,35 97,35 68,56 79,90 50,68 21,90 32,56 3,35 39,35",fill:color,opacity:0.85}),
+    React.createElement("polygon",{points:"50,15 58,38 82,38 63,52 70,75 50,60 30,75 37,52 18,38 42,38",fill:color,opacity:0.3})
+  ),
+  React.createElement("div",{style:{width:6,height:6,borderRadius:"50%",background:color,opacity:0.5}}),
+  React.createElement("div",{style:{width:5,height:5,borderRadius:"50%",background:color,opacity:0.4}}),
+  React.createElement("div",{style:{flex:1,maxWidth:120,height:1,background:`linear-gradient(to left,transparent,${color}55)`}})
+);
+
+const ArabesqueBorder=({color})=>{
+  const d="M0,10 Q7.5,2 15,10 Q22.5,18 30,10 Q37.5,2 45,10 Q52.5,18 60,10";
+  const d2="M0,10 Q7.5,18 15,10 Q22.5,2 30,10 Q37.5,18 45,10 Q52.5,2 60,10";
+  return React.createElement("div",{style:{width:"100%",overflow:"hidden",height:24,display:"flex",alignItems:"center",justifyContent:"center",opacity:0.5}},
+    React.createElement("svg",{xmlns:"http://www.w3.org/2000/svg",viewBox:"0 0 600 20",width:"100%",height:20,preserveAspectRatio:"none"},
+      [0,60,120,180,240,300,360,420,480,540].map((x,i)=>React.createElement("g",{key:i,transform:`translate(${x},0)`},
+        React.createElement("path",{d:d,stroke:color,strokeWidth:0.8,fill:"none",opacity:0.5}),
+        React.createElement("path",{d:d2,stroke:color,strokeWidth:0.8,fill:"none",opacity:0.5}),
+        React.createElement("circle",{cx:0,cy:10,r:1.5,fill:color,opacity:0.6}),
+        React.createElement("circle",{cx:30,cy:10,r:1.5,fill:color,opacity:0.6})
+      ))
+    )
+  );
+};
+
+const Bismillah=({theme})=>React.createElement("div",{style:{position:"fixed",top:0,left:0,right:0,zIndex:1001,height:32,display:"flex",alignItems:"center",justifyContent:"center",gap:12,background:theme.navBg,backdropFilter:"blur(16px)",borderBottom:`1px solid ${theme.cardBorder}`,transition:"all 0.5s"}},
+  React.createElement("div",{style:{flex:1,maxWidth:80,height:1,background:`linear-gradient(to right,transparent,${theme.primary}30)`}}),
+  React.createElement("span",{style:{fontFamily:"'Amiri',serif",fontSize:"clamp(14px,2vw,18px)",color:theme.primary,opacity:0.5,letterSpacing:"0.02em",textShadow:`0 0 12px ${theme.glow}`}},"بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"),
+  React.createElement("div",{style:{flex:1,maxWidth:80,height:1,background:`linear-gradient(to left,transparent,${theme.primary}30)`}})
+);
+
+const ArchHeader=({children,color,glow})=>React.createElement("div",{style:{position:"relative",display:"inline-block",padding:"32px 72px 24px"}},
+  React.createElement("svg",{xmlns:"http://www.w3.org/2000/svg",viewBox:"0 0 300 100",preserveAspectRatio:"none",style:{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none"}},
+    React.createElement("path",{d:"M15,100 L15,42 Q15,5 75,3 L150,0 L225,3 Q285,5 285,42 L285,100",stroke:color,strokeWidth:1.5,fill:"none",opacity:0.45}),
+    React.createElement("path",{d:"M28,100 L28,46 Q28,14 88,11 L150,9 L212,11 Q272,14 272,46 L272,100",stroke:color,strokeWidth:0.8,fill:"none",opacity:0.25}),
+    React.createElement("circle",{cx:150,cy:3,r:3,fill:color,opacity:0.4}),
+    React.createElement("circle",{cx:15,cy:100,r:2,fill:color,opacity:0.3}),
+    React.createElement("circle",{cx:285,cy:100,r:2,fill:color,opacity:0.3})
+  ),
+  React.createElement("div",{style:{position:"relative",zIndex:1}},children)
+);
+
+function App(){
+  const[tm,setTm]=useState("andalous");
+  const[lang,setLang]=useState("en");
+  const[filter,setFilter]=useState("All");
+  const[menuOpen,setMenuOpen]=useState(false);
+  const[vis,setVis]=useState(new Set(["home"]));
+  const th=themes[tm],t=T[lang],rtl=t.dir==="rtl",bf=t.lf||th.fontBody,hf=t.lf||th.font;
+
+  useEffect(()=>{const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setVis(p=>new Set([...p,e.target.id]));});},{threshold:0.08});document.querySelectorAll("[data-anim]").forEach(el=>obs.observe(el));return()=>obs.disconnect();},[lang,tm]);
+  const go=id=>{if(id==="apps"){window.open("https://abourdim.github.io/apps/","_blank");return;}document.getElementById(id)?.scrollIntoView({behavior:"smooth"});setMenuOpen(false);};
+  const an=(id,d=0)=>({opacity:vis.has(id)?1:0,transform:vis.has(id)?"translateY(0)":"translateY(36px)",transition:`opacity 0.7s ease ${d}s, transform 0.7s ease ${d}s`});
+  const fl={All:t.wh.all,Beginner:t.wh.beg,Intermediate:t.wh.int,Advanced:t.wh.adv};
+  const fw=filter==="All"?t.ws:t.ws.filter(w=>w.lvl===filter);
+
+  // Card component with hover
+  const Card=({children,style:s})=>{const[h,sH]=useState(false);return React.createElement("div",{onMouseEnter:()=>sH(true),onMouseLeave:()=>sH(false),style:{background:th.surface,border:`1px solid ${th.cardBorder}`,borderRadius:th.radius,padding:22,boxShadow:h?`0 12px 40px ${th.glow},0 0 0 1px ${th.primary}44`:th.shadow,transform:h?"translateY(-4px)":"translateY(0)",transition:"all 0.4s",position:"relative",overflow:"hidden",...s}},React.createElement("div",{style:{content:"",position:"absolute",inset:0,pointerEvents:"none",background:`linear-gradient(135deg,${th.glow},transparent 60%)`,mixBlendMode:"soft-light"}}),React.createElement("div",{style:{position:"relative",zIndex:1}},children));};
+
+  return React.createElement("div",{dir:t.dir,style:{fontFamily:bf,background:`radial-gradient(circle at top left,${th.glow},transparent 50%),radial-gradient(circle at bottom right,${themes[tm].accent2}15,transparent 55%),${th.bg}`,backgroundAttachment:"fixed",color:th.text,minHeight:"100vh",transition:"background 0.5s,color 0.5s"}},
+
+    // ─── BISMILLAH ───
+    React.createElement(Bismillah,{theme:th}),
+
+    // ─── NAV (matching header pattern: logo + title + subtitle | theme-picker | chip) ───
+    React.createElement("nav",{style:{position:"fixed",top:32,left:0,right:0,zIndex:1000,background:th.navBg,backdropFilter:"blur(16px)",borderBottom:`1px solid ${th.cardBorder}`,padding:"0 18px",height:78,display:"flex",alignItems:"center",justifyContent:"space-between",fontFamily:hf,transition:"all 0.5s"}},
+      // Title block (logo + title + subtitle)
+      React.createElement("div",{style:{display:"flex",alignItems:"center",cursor:"pointer"},onClick:()=>go("home")},
+        React.createElement("img",{src:"logo-transparent.png",alt:"Workshop DIY",width:72,height:72,style:{display:"block",filter:th.logoFilter,transition:"filter 0.5s"}})
+      ),
+      // Desktop nav
+      React.createElement("div",{className:"dsk-nav",style:{display:"flex",alignItems:"center",gap:18}},
+        t.nav.map((n,i)=>React.createElement("span",{key:i,onClick:()=>go(sIds[i]),style:{cursor:"pointer",fontSize:12,fontWeight:500,color:th.textMuted,transition:"color 0.3s",letterSpacing:"0.08em",textTransform:"uppercase"},onMouseEnter:e=>e.target.style.color=th.primary,onMouseLeave:e=>e.target.style.color=th.textMuted},n)),
+        // Theme picker (matching your pattern exactly)
+        React.createElement("div",{style:{display:"flex",gap:3,padding:"3px 6px",borderRadius:99,background:th.bgAlt,border:`1px solid ${th.cardBorder}`}},
+          Object.entries(themes).map(([k,v])=>React.createElement("button",{key:k,onClick:()=>setTm(k),title:v.name,style:{width:28,height:28,borderRadius:"50%",border:k===tm?`2px solid ${th.primary}`:"2px solid transparent",background:k===tm?th.glow:"transparent",cursor:"pointer",fontSize:13,display:"flex",alignItems:"center",justifyContent:"center",transition:"all 0.3s",boxShadow:k===tm?th.chipGlow:"none"}},v.icon))
+        ),
+        // Lang switcher
+        React.createElement("div",{style:{display:"flex",gap:1,borderRadius:99,background:th.bgAlt,border:`1px solid ${th.cardBorder}`,overflow:"hidden"}},
+          ["en","fr","ar"].map(l=>React.createElement("button",{key:l,onClick:()=>setLang(l),style:{padding:"5px 12px",border:"none",cursor:"pointer",fontSize:10,fontWeight:700,background:l===lang?th.gradient:"transparent",color:l===lang?th.btnText:th.textMuted,transition:"all 0.3s",textTransform:"uppercase",fontFamily:hf,letterSpacing:"0.12em"}},l))
+        ),
+        // Status chip
+        React.createElement("div",{style:{display:"inline-flex",alignItems:"center",gap:6,borderRadius:999,border:`1px solid ${th.primary}88`,padding:"4px 10px",background:`radial-gradient(circle at top left,${th.glow},transparent 60%),${th.bgAlt}`,fontSize:11,textTransform:"uppercase",letterSpacing:"0.12em",color:th.primary,boxShadow:th.chipGlow}},
+          React.createElement("div",{style:{width:7,height:7,borderRadius:999,background:th.primary,boxShadow:`0 0 0 3px ${th.glow},0 0 14px ${th.primary}88`}}),
+          "Ready!"
+        )
+      ),
+      React.createElement("button",{className:"mob-btn",onClick:()=>setMenuOpen(!menuOpen),style:{display:"none",background:"none",border:"none",cursor:"pointer",fontSize:22,color:th.text,padding:6}},menuOpen?"✕":"☰")
+    ),
+
+    // Mobile menu
+    menuOpen&&React.createElement("div",{style:{position:"fixed",inset:0,zIndex:999,background:th.bg+"F0",backdropFilter:"blur(20px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:24,fontFamily:hf}},
+      React.createElement("div",{style:{marginBottom:10}},React.createElement("img",{src:"logo-transparent.png",alt:"Workshop DIY",width:100,height:100,style:{display:"block",filter:th.logoFilter}})),
+      t.nav.map((n,i)=>React.createElement("span",{key:i,onClick:()=>go(sIds[i]),style:{cursor:"pointer",fontSize:20,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase"}},n)),
+      React.createElement("div",{style:{display:"flex",gap:6}},Object.entries(themes).map(([k,v])=>React.createElement("button",{key:k,onClick:()=>setTm(k),style:{width:38,height:38,borderRadius:"50%",border:k===tm?`2px solid ${th.primary}`:`1px solid ${th.cardBorder}`,background:k===tm?th.glow:"transparent",cursor:"pointer",fontSize:16,boxShadow:k===tm?th.chipGlow:"none"}},v.icon))),
+      React.createElement("div",{style:{display:"flex",gap:4}},["en","fr","ar"].map(l=>React.createElement("button",{key:l,onClick:()=>{setLang(l);setMenuOpen(false);},style:{padding:"8px 18px",border:"none",borderRadius:99,cursor:"pointer",fontSize:12,fontWeight:700,background:l===lang?th.gradient:th.bgAlt,color:l===lang?th.btnText:th.textMuted,textTransform:"uppercase"}},l)))
+    ),
+
+    // ─── HERO ───
+    React.createElement("section",{id:"home","data-anim":"",style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"132px 20px 60px",position:"relative",overflow:"hidden",backgroundImage:th.heroBg,...an("home")}},
+      React.createElement(Particles,{theme:th}),
+      React.createElement("div",{style:{position:"relative",zIndex:1}},
+        React.createElement("h1",{style:{fontFamily:hf,fontSize:"clamp(40px,8vw,80px)",fontWeight:900,color:th.primary,lineHeight:1.1,marginBottom:10,letterSpacing:"0.02em"}},t.hero.title),
+        React.createElement("p",{style:{fontSize:"clamp(14px,2vw,20px)",fontWeight:600,color:th.primary,marginBottom:th.islamic?0:20,fontFamily:hf,letterSpacing:"0.18em",textTransform:"uppercase"}},t.hero.chip),
+        th.islamic&&React.createElement(StarDivider,{color:th.primary,glow:th.glow}),
+        React.createElement("p",{style:{fontSize:"clamp(16px,2.5vw,24px)",fontWeight:600,color:th.textMuted,marginBottom:8,fontFamily:hf,letterSpacing:"0.08em"}},t.hero.sub),
+        React.createElement("p",{style:{fontSize:"clamp(13px,1.6vw,16px)",color:th.textMuted,maxWidth:460,margin:"0 auto 36px",lineHeight:1.7,fontFamily:bf}},t.hero.tag),
+        React.createElement("div",{style:{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}},
+          React.createElement("button",{onClick:()=>go("workshops"),style:{padding:"12px 28px",borderRadius:th.radius,border:`1px solid ${th.primary}88`,background:th.gradient,color:th.btnText,fontWeight:700,fontSize:14,fontFamily:hf,cursor:"pointer",boxShadow:th.chipGlow,letterSpacing:"0.08em",textTransform:"uppercase"}},t.hero.cta1),
+          React.createElement("button",{onClick:()=>go("apps"),style:{padding:"12px 28px",borderRadius:th.radius,cursor:"pointer",background:"transparent",border:`1px solid ${th.primary}`,color:th.primary,fontWeight:700,fontSize:14,fontFamily:hf,letterSpacing:"0.08em",textTransform:"uppercase"}},"🚀 "+t.hero.cta3)
+        )
+      ),
+      React.createElement("div",{style:{position:"absolute",bottom:28,left:"50%",transform:"translateX(-50%)"}},React.createElement("div",{style:{width:22,height:36,borderRadius:11,border:`2px solid ${th.textMuted}33`,display:"flex",justifyContent:"center",paddingTop:7}},React.createElement("div",{style:{width:3,height:7,borderRadius:3,background:th.primary,animation:"sBounce 2s infinite"}})))
+    ),
+
+    // ─── SHOP BANNER STRIP ───
+    th.islamic&&React.createElement(ArabesqueBorder,{color:th.primary}),
+    React.createElement("div",{onClick:()=>go("shop"),style:{cursor:"pointer",padding:"12px 20px",background:th.bgAlt,borderTop:`1px solid ${th.cardBorder}`,borderBottom:`1px solid ${th.cardBorder}`,display:"flex",alignItems:"center",justifyContent:"center",gap:16,flexWrap:"wrap",transition:"all 0.3s"},onMouseEnter:e=>{e.currentTarget.style.background=th.glow;},onMouseLeave:e=>{e.currentTarget.style.background=th.bgAlt;}},
+      React.createElement("span",{style:{fontSize:12,color:th.textMuted,fontFamily:hf,letterSpacing:"0.06em"}},"🛒 "+t.shop.product),
+      React.createElement("span",{style:{fontSize:13,fontWeight:700,color:th.primary,fontFamily:hf}},t.shop.price),
+      React.createElement("span",{style:{fontSize:11,color:th.textMuted,fontFamily:bf}},"— "+t.shop.ship),
+      React.createElement("span",{style:{fontSize:11,fontWeight:600,color:th.primary,fontFamily:hf,padding:"3px 10px",borderRadius:999,border:`1px solid ${th.primary}44`,letterSpacing:"0.08em",textTransform:"uppercase"}},t.shop.order+" →")
+    ),
+    th.islamic&&React.createElement(ArabesqueBorder,{color:th.primary}),
+
+    // ─── WORKSHOPS ───
+    React.createElement("section",{id:"workshops","data-anim":"",style:{padding:"90px 20px",maxWidth:1200,margin:"0 auto",...an("workshops")}},
+      React.createElement("div",{style:{textAlign:"center",marginBottom:44}},
+        th.islamic?React.createElement(ArchHeader,{color:th.primary,glow:th.glow},
+          React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,40px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.wh.title),
+          React.createElement("p",{style:{color:th.textMuted,fontSize:16,maxWidth:460,margin:"0 auto 0",fontFamily:bf}},t.wh.sub)
+        ):React.createElement(React.Fragment,null,
+          React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,40px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.wh.title),
+          React.createElement("p",{style:{color:th.textMuted,fontSize:16,maxWidth:460,margin:"0 auto 28px",fontFamily:bf}},t.wh.sub)
+        ),
+        th.islamic&&React.createElement(StarDivider,{color:th.primary,glow:th.glow}),
+        React.createElement("div",{style:{display:"flex",gap:6,justifyContent:"center",flexWrap:"wrap"}},["All","Beginner","Intermediate","Advanced"].map(f=>React.createElement("button",{key:f,onClick:()=>setFilter(f),style:{padding:"6px 16px",borderRadius:999,border:`1px solid ${filter===f?th.primary+"88":th.cardBorder}`,cursor:"pointer",background:filter===f?th.gradient:th.bgAlt,color:filter===f?th.btnText:th.textMuted,fontWeight:600,fontSize:11,fontFamily:hf,transition:"all 0.3s",letterSpacing:"0.08em",textTransform:"uppercase",boxShadow:filter===f?th.chipGlow:"none"}},fl[f])))
+      ),
+      React.createElement("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:16}},
+        fw.map((w,i)=>React.createElement(Card,{key:w.t+i,style:{opacity:vis.has("workshops")?1:0,transform:vis.has("workshops")?"translateY(0)":"translateY(28px)",transitionDelay:`${Math.min(i*0.04,0.4)}s`}},
+          React.createElement("div",{style:{position:"absolute",top:14,[rtl?"left":"right"]:14,fontSize:9,fontWeight:700,padding:"2px 8px",borderRadius:999,background:lvlC[w.lvl][1],color:lvlC[w.lvl][0],fontFamily:hf,letterSpacing:"0.1em",textTransform:"uppercase",zIndex:2}},lvlE[w.lvl]+" "+fl[w.lvl]),
+          React.createElement("h3",{style:{fontFamily:hf,fontSize:15,fontWeight:700,marginBottom:6,[rtl?"paddingLeft":"paddingRight"]:70,letterSpacing:"0.04em"}},w.t),
+          React.createElement("p",{style:{color:th.textMuted,fontSize:12.5,lineHeight:1.6,marginBottom:12,fontFamily:bf}},w.d),
+          React.createElement("div",{style:{display:"flex",gap:12,fontSize:10.5,color:th.textMuted,fontFamily:hf,letterSpacing:"0.06em"}},React.createElement("span",null,"🎯 "+t.wh.age+": "+w.age),React.createElement("span",null,"⏱ "+t.wh.dur+": "+w.dur))
+        ))
+      )
+    ),
+
+    // ─── SHOP ───
+    th.islamic&&React.createElement(ArabesqueBorder,{color:th.primary}),
+    React.createElement("section",{id:"shop","data-anim":"",style:{padding:"90px 20px",background:`radial-gradient(circle at center,${th.glow},transparent 70%),${th.bgAlt}`,...an("shop")}},
+      React.createElement("div",{style:{maxWidth:1200,margin:"0 auto"}},
+        React.createElement("div",{style:{textAlign:"center",marginBottom:44}},
+          th.islamic?React.createElement(ArchHeader,{color:th.primary,glow:th.glow},
+            React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,40px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.shop.title),
+            React.createElement("p",{style:{color:th.textMuted,fontSize:16,fontFamily:bf}},t.shop.sub)
+          ):React.createElement(React.Fragment,null,
+            React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,40px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.shop.title),
+            React.createElement("p",{style:{color:th.textMuted,fontSize:16,fontFamily:bf}},t.shop.sub)
+          ),
+          th.islamic&&React.createElement(StarDivider,{color:th.primary,glow:th.glow})
+        ),
+        React.createElement("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20,alignItems:"start"}},
+          React.createElement(Card,{style:{}},
+            React.createElement("div",{style:{position:"absolute",top:16,[rtl?"left":"right"]:16,background:th.gradient,padding:"3px 10px",borderRadius:999,fontSize:9,fontWeight:700,color:th.btnText,fontFamily:hf,letterSpacing:"0.12em",textTransform:"uppercase",zIndex:2}},t.shop.made),
+            React.createElement("h3",{style:{fontFamily:hf,fontSize:20,fontWeight:800,marginBottom:6,letterSpacing:"0.04em"}},t.shop.product),
+            React.createElement("div",{style:{fontSize:36,fontWeight:900,fontFamily:hf,color:th.primary,marginBottom:6}},t.shop.price),
+            React.createElement("p",{style:{color:th.textMuted,fontSize:12,marginBottom:20,fontFamily:bf}},"🚀 "+t.shop.ship),
+            React.createElement("a",{href:"https://www.helloasso.com/associations/workshop-diy/boutiques/the-esp32-lite-smart-robot-kit/",target:"_blank",rel:"noopener noreferrer",style:{display:"inline-block",padding:"12px 32px",borderRadius:th.radius,background:th.gradient,color:th.btnText,fontWeight:700,fontSize:14,fontFamily:hf,textDecoration:"none",boxShadow:th.chipGlow,letterSpacing:"0.08em",textTransform:"uppercase",border:`1px solid ${th.primary}88`}},t.shop.order)
+          ),
+          React.createElement(Card,{style:{}},
+            React.createElement("h4",{style:{fontFamily:hf,fontSize:12,fontWeight:700,marginBottom:14,color:th.primary,letterSpacing:"0.12em",textTransform:"uppercase"}},"📦 "+t.shop.feat.length+" Components"),
+            React.createElement("div",{style:{display:"grid",gap:6}},t.shop.feat.map((f,i)=>React.createElement("div",{key:i,style:{display:"flex",alignItems:"center",gap:8,padding:"8px 10px",borderRadius:8,background:th.bgAlt,border:`1px solid ${th.cardBorder}`,fontSize:12,fontFamily:bf}},React.createElement("span",{style:{color:th.primary,fontWeight:700}},"✓"),f)))
+          ),
+          React.createElement(Card,{style:{}},
+            React.createElement("h4",{style:{fontFamily:hf,fontSize:12,fontWeight:700,marginBottom:14,letterSpacing:"0.12em",textTransform:"uppercase"}},t.shop.perfect),
+            React.createElement("div",{style:{display:"grid",gap:8}},t.shop.audience.map((a,i)=>React.createElement("div",{key:i,style:{padding:"10px 14px",borderRadius:8,background:`${[th.primary,th.secondary,th.accent,th.accent2][i]}15`,border:`1px solid ${[th.primary,th.secondary,th.accent,th.accent2][i]}33`,fontSize:12,fontWeight:600,fontFamily:bf}},["🎓","🔧","💡","⚡"][i]+" "+a)))
+          )
+        )
+      )
+    ),
+
+    // ─── TEAM ───
+    th.islamic&&React.createElement(ArabesqueBorder,{color:th.primary}),
+    React.createElement("section",{id:"team","data-anim":"",style:{padding:"90px 20px",maxWidth:960,margin:"0 auto",...an("team")}},
+      React.createElement("div",{style:{textAlign:"center",marginBottom:44}},
+        th.islamic?React.createElement(ArchHeader,{color:th.primary,glow:th.glow},
+          React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,40px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.team.title),
+          React.createElement("p",{style:{color:th.textMuted,fontSize:16,fontFamily:bf}},t.team.sub)
+        ):React.createElement(React.Fragment,null,
+          React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,40px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.team.title),
+          React.createElement("p",{style:{color:th.textMuted,fontSize:16,fontFamily:bf}},t.team.sub)
+        ),
+        th.islamic&&React.createElement(StarDivider,{color:th.primary,glow:th.glow})
+      ),
+      React.createElement(Card,{style:{textAlign:"center",marginBottom:20}},
+        React.createElement("h3",{style:{fontFamily:hf,fontSize:18,fontWeight:700,marginBottom:12,color:th.primary,letterSpacing:"0.08em"}},t.team.mission),
+        React.createElement("p",{style:{color:th.textMuted,fontSize:14,lineHeight:1.8,maxWidth:600,margin:"0 auto",fontFamily:bf}},t.team.mt)
+      ),
+      React.createElement("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(270px,1fr))",gap:16}},
+        React.createElement(Card,{style:{textAlign:"center"}},
+          React.createElement("div",{style:{width:68,height:68,borderRadius:"50%",background:th.gradient,margin:"0 auto 12px",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:th.chipGlow}},React.createElement(Logo,{color:th.btnText,size:40,filter:"brightness(0) invert(1)"})),
+          React.createElement("h3",{style:{fontFamily:hf,fontSize:18,fontWeight:700,marginBottom:4}},t.team.name),
+          React.createElement("p",{style:{color:th.primary,fontSize:11,fontWeight:600,marginBottom:8,fontFamily:hf,letterSpacing:"0.08em",textTransform:"uppercase"}},t.team.role),
+          React.createElement("p",{style:{color:th.textMuted,fontSize:12.5,lineHeight:1.7,fontFamily:bf}},t.team.bio)
+        ),
+        React.createElement(Card,{style:{}},
+          React.createElement("h4",{style:{fontFamily:hf,fontSize:12,fontWeight:700,marginBottom:14,letterSpacing:"0.12em",textTransform:"uppercase"}},"💻 "+t.team.gh),
+          React.createElement("div",{style:{display:"grid",gap:5}},t.team.gi.map((item,i)=>React.createElement("a",{key:i,href:`https://github.com/abourdim/${ghR[i]}`,target:"_blank",rel:"noopener noreferrer",style:{padding:"9px 12px",borderRadius:8,background:th.bgAlt,border:`1px solid ${th.cardBorder}`,fontSize:11.5,color:th.text,textDecoration:"none",display:"flex",alignItems:"center",gap:8,transition:"all 0.3s",fontFamily:bf},onMouseEnter:e=>{e.currentTarget.style.borderColor=th.primary;e.currentTarget.style.boxShadow=`0 0 8px ${th.glow}`;},onMouseLeave:e=>{e.currentTarget.style.borderColor=th.cardBorder;e.currentTarget.style.boxShadow="none";}},React.createElement("span",{style:{color:th.primary}},"▸")," "+item)))
+        )
+      )
+    ),
+
+    // ─── CONTACT ───
+    th.islamic&&React.createElement(ArabesqueBorder,{color:th.primary}),
+    React.createElement("section",{id:"contact","data-anim":"",style:{padding:"70px 20px",background:`radial-gradient(circle at center,${th.glow},transparent 70%),${th.bgAlt}`,...an("contact")}},
+      React.createElement("div",{style:{maxWidth:720,margin:"0 auto",textAlign:"center"}},
+        th.islamic?React.createElement(ArchHeader,{color:th.primary,glow:th.glow},
+          React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,36px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.contact.title)
+        ):React.createElement("h2",{style:{fontFamily:hf,fontSize:"clamp(24px,4vw,36px)",fontWeight:800,marginBottom:10,letterSpacing:"0.04em"}},t.contact.title),
+        th.islamic&&React.createElement(StarDivider,{color:th.primary,glow:th.glow}),
+        React.createElement("p",{style:{color:th.textMuted,fontSize:16,marginBottom:28,fontFamily:bf}},t.contact.sub),
+        React.createElement("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:14,marginBottom:28,maxWidth:640,margin:"0 auto 28px"}},
+          React.createElement("a",{href:"mailto:"+t.contact.emailAddr,style:{display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"18px 14px",borderRadius:th.radius,background:th.bgAlt,border:`1px solid ${th.cardBorder}`,textDecoration:"none",transition:"all 0.3s"},onMouseEnter:e=>{e.currentTarget.style.borderColor=th.primary;e.currentTarget.style.boxShadow=`0 0 12px ${th.glow}`;},onMouseLeave:e=>{e.currentTarget.style.borderColor=th.cardBorder;e.currentTarget.style.boxShadow="none";}},
+            React.createElement("span",{style:{fontSize:20}},"✉️"),
+            React.createElement("span",{style:{fontSize:12,color:th.primary,fontFamily:bf}},t.contact.emailAddr)
+          ),
+          React.createElement("a",{href:t.contact.phoneHref,style:{display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"18px 14px",borderRadius:th.radius,background:th.bgAlt,border:`1px solid ${th.cardBorder}`,textDecoration:"none",transition:"all 0.3s"},onMouseEnter:e=>{e.currentTarget.style.borderColor=th.primary;e.currentTarget.style.boxShadow=`0 0 12px ${th.glow}`;},onMouseLeave:e=>{e.currentTarget.style.borderColor=th.cardBorder;e.currentTarget.style.boxShadow="none";}},
+            React.createElement("span",{style:{fontSize:20}},"📞"),
+            React.createElement("span",{style:{fontSize:12,color:th.primary,fontFamily:bf}},t.contact.phone)
+          ),
+          React.createElement("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:6,padding:"18px 14px",borderRadius:th.radius,background:th.bgAlt,border:`1px solid ${th.cardBorder}`}},
+            React.createElement("span",{style:{fontSize:20}},"📍"),
+            React.createElement("span",{style:{fontSize:12,color:th.textMuted,fontFamily:bf,textAlign:"center"}},t.contact.addr)
+          )
+        ),
+        React.createElement("div",{style:{display:"flex",gap:16,justifyContent:"center",alignItems:"center",flexWrap:"wrap",color:th.textMuted,fontSize:12,marginBottom:8}},
+          React.createElement("a",{href:"https://workshop-diy.org",target:"_blank",rel:"noopener noreferrer",style:{color:th.primary,textDecoration:"none"}},"🌐 "+t.contact.web),
+          React.createElement("span",{style:{opacity:0.3}},"•"),
+          React.createElement("a",{href:"https://github.com/abourdim",target:"_blank",rel:"noopener noreferrer",style:{color:th.primary,textDecoration:"none"}},"💻 "+t.contact.gh)
+        ),
+        React.createElement("div",{style:{marginTop:36,paddingTop:18,borderTop:`1px solid ${th.cardBorder}`,fontSize:11,color:th.textMuted,letterSpacing:"0.06em"}},t.contact.copy)
+      )
+    )
+  );
+}
+
+ReactDOM.render(React.createElement(App),document.getElementById("root"));
+</script>
+</body>
+</html>
