@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workshop DIY — Web Assets Usage Guide</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #222; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.1rem; margin: 2.5rem 0 0.75rem; color: #007BFF; border-bottom: 2px solid #007BFF; padding-bottom: 0.3rem; }
+    h3 { font-size: 0.95rem; margin: 1.5rem 0 0.5rem; color: #444; }
+    .subtitle { color: #666; margin-bottom: 2rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
+    .card { background: #fff; border-radius: 12px; padding: 1.5rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card img, .card object { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+    .card p { margin-top: 0.75rem; font-size: 0.75rem; color: #666; font-family: monospace; }
+    .dark { background: #1a1a2e; }
+    pre { background: #1a1a2e; color: #e0e0e0; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.82rem; line-height: 1.6; margin: 0.5rem 0; }
+    .tag { color: #ef9a9a; }
+    .attr { color: #ce93d8; }
+    .val { color: #a5d6a7; }
+    .cmt { color: #78909c; }
+    .section { background: #fff; border-radius: 12px; padding: 1.5rem 2rem; margin: 1rem 0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .cb { background-image: linear-gradient(45deg, #e0e0e0 25%, transparent 25%), linear-gradient(-45deg, #e0e0e0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e0e0e0 75%), linear-gradient(-45deg, transparent 75%, #e0e0e0 75%); background-size: 16px 16px; background-position: 0 0, 0 8px, 8px -8px, -8px 0px; border-radius: 8px; padding: 1rem; display: inline-block; }
+  </style>
+</head>
+<body>
+
+  <h1>Workshop DIY — Web Assets</h1>
+  <p class="subtitle">Complete icon &amp; logo package for web.</p>
+
+  <h2>1. Header Logo (SVG)</h2>
+  <div class="grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="card">
+      <object data="logo-web.svg" type="image/svg+xml" width="100%"></object>
+      <p>logo-web.svg — light bg</p>
+    </div>
+    <div class="card dark">
+      <object data="logo-web.svg" type="image/svg+xml" width="100%"></object>
+      <p style="color:#999">logo-web.svg — dark bg</p>
+    </div>
+  </div>
+  <pre>&lt;<span class="tag">img</span> <span class="attr">src</span>=<span class="val">"/logo-web.svg"</span> <span class="attr">alt</span>=<span class="val">"Workshop DIY"</span> <span class="attr">height</span>=<span class="val">"48"</span>&gt;</pre>
+
+  <h2>2. Full Logo Icon (recommended)</h2>
+  <p style="margin-bottom:1rem; color:#555;">Your complete logo fitted into a square.</p>
+  <div class="grid">
+    <div class="card"><div class="cb"><img src="icon.svg" width="96" height="96"></div><p>icon.svg</p></div>
+    <div class="card"><img src="icon-on-blue.svg" width="96" height="96"><p>icon-on-blue.svg</p></div>
+    <div class="card"><div class="cb"><img src="icon-512.png" width="96" height="96"></div><p>icon-512.png</p></div>
+    <div class="card"><img src="icon-512-bg.png" width="96" height="96"><p>icon-512-bg.png</p></div>
+  </div>
+
+  <h3>Favicon sizes (full logo)</h3>
+  <div class="grid">
+    <div class="card"><img src="favicon-16.png" width="16" height="16" style="image-rendering:pixelated"><p>16x16</p></div>
+    <div class="card"><img src="favicon-32.png" width="32" height="32"><p>32x32</p></div>
+    <div class="card"><img src="favicon-48.png" width="48" height="48"><p>48x48</p></div>
+    <div class="card"><img src="apple-touch-icon.png" width="90" height="90"><p>180x180 Apple Touch</p></div>
+  </div>
+
+  <h2>3. Plug Symbol Icon (alternative)</h2>
+  <p style="margin-bottom:1rem; color:#555;">Just the circuit/plug motif — great for app icons or where you need max clarity at tiny sizes.</p>
+  <div class="grid">
+    <div class="card"><div class="cb"><img src="plug-icon.svg" width="96" height="96"></div><p>plug-icon.svg</p></div>
+    <div class="card"><img src="plug-icon-on-blue.svg" width="96" height="96"><p>plug-icon-on-blue.svg</p></div>
+    <div class="card"><div class="cb"><img src="plug-icon-512.png" width="96" height="96"></div><p>plug-icon-512.png</p></div>
+    <div class="card"><img src="plug-icon-512-bg.png" width="96" height="96"><p>plug-icon-512-bg.png</p></div>
+  </div>
+
+  <h2>4. Complete &lt;head&gt; snippet</h2>
+  <pre><span class="cmt">&lt;!-- Favicon --&gt;</span>
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="val">"icon"</span> <span class="attr">href</span>=<span class="val">"/favicon.ico"</span> <span class="attr">sizes</span>=<span class="val">"48x48"</span>&gt;
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="val">"icon"</span> <span class="attr">href</span>=<span class="val">"/icon.svg"</span> <span class="attr">type</span>=<span class="val">"image/svg+xml"</span>&gt;
+<span class="cmt">&lt;!-- Apple Touch Icon --&gt;</span>
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="val">"apple-touch-icon"</span> <span class="attr">href</span>=<span class="val">"/apple-touch-icon.png"</span>&gt;
+<span class="cmt">&lt;!-- Web App Manifest --&gt;</span>
+&lt;<span class="tag">link</span> <span class="attr">rel</span>=<span class="val">"manifest"</span> <span class="attr">href</span>=<span class="val">"/manifest.json"</span>&gt;</pre>
+
+  <h2>5. manifest.json (PWA)</h2>
+  <pre>{
+  "name": "Workshop DIY",
+  "short_name": "WDIY",
+  "icons": [
+    { "src": "/icon-192.png",    "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png",    "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-192-bg.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512-bg.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}</pre>
+
+  <h2>6. All files</h2>
+  <div class="section" style="font-size:0.85rem; line-height:2;">
+    <strong>Header:</strong> logo-web.svg<br>
+    <strong>Full logo icons:</strong> icon.svg, icon-on-blue.svg, icon-192.png, icon-512.png, icon-192-bg.png, icon-512-bg.png<br>
+    <strong>Plug icons:</strong> plug-icon.svg, plug-icon-on-blue.svg, plug-icon-192.png, plug-icon-512.png, plug-icon-192-bg.png, plug-icon-512-bg.png<br>
+    <strong>Favicons:</strong> favicon.ico (16+32+48), favicon-16.png, favicon-32.png, favicon-48.png, apple-touch-icon.png (180x180)
+  </div>
+
+</body>
+</html>
