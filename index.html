@@ -118,7 +118,7 @@ function App(){
   const th=themes[tm],t=T[lang],rtl=t.dir==="rtl",bf=t.lf||th.fontBody,hf=t.lf||th.font;
 
   useEffect(()=>{const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setVis(p=>new Set([...p,e.target.id]));});},{threshold:0.08});document.querySelectorAll("[data-anim]").forEach(el=>obs.observe(el));return()=>obs.disconnect();},[lang,tm]);
-  const go=id=>{if(id==="apps"){window.open("https://abourdim.github.io/all/","_blank");return;}document.getElementById(id)?.scrollIntoView({behavior:"smooth"});setMenuOpen(false);};
+  const go=id=>{if(id==="apps"){window.open("https://abourdim.github.io/apps/","_blank");return;}document.getElementById(id)?.scrollIntoView({behavior:"smooth"});setMenuOpen(false);};
   const an=(id,d=0)=>({opacity:vis.has(id)?1:0,transform:vis.has(id)?"translateY(0)":"translateY(36px)",transition:`opacity 0.7s ease ${d}s, transform 0.7s ease ${d}s`});
   const fl={All:t.wh.all,Beginner:t.wh.beg,Intermediate:t.wh.int,Advanced:t.wh.adv};
   const fw=filter==="All"?t.ws:t.ws.filter(w=>w.lvl===filter);
